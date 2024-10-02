@@ -1,0 +1,22 @@
+use ventas_jugos;
+
+CREATE TABLE tb_venta(
+NUMERO VARCHAR(5) NOT NULL,
+FECHA DATE DEFAULT NULL,
+DNI VARCHAR(8) NOT NULL,
+MATRICULA VARCHAR(5) NOT NULL,
+IMPUESTO FLOAT DEFAULT NULL,
+PRIMARY KEY(NUMERO)
+);
+
+ALTER TABLE tb_venta ADD CONSTRAINT FK_CLIENTE
+FOREIGN KEY(DNI) REFERENCES tb_cliente(DNI);
+
+ALTER TABLE tb_venta ADD CONSTRAINT FK_VENDEDOR
+FOREIGN KEY(MATRICULA) REFERENCES tb_vendedor(MATRICULA);
+
+/* Crea, por línea de comando, la clave externa que relaciona a la tabla facturas
+con items_facturas a través del campo NUMERO. */
+
+ALTER TABLE items_facturas ADD CONSTRAINT FK_FACTURAS
+FOREIGN KEY(NUMERO) REFERENCES factura;

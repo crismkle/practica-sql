@@ -1,0 +1,8 @@
+CREATE DATABASE ventas_jugos;
+
+CREATE SCHEMA IF NOT EXISTS venta_jugos2;
+
+DROP DATABASE venta_jugos2;
+
+CREATE SCHEMA IF NOT EXISTS venta_jugos2 DEFAULT
+CHARSET utf32;

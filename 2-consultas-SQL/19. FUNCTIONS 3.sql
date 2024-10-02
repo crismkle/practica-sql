@@ -1,0 +1,21 @@
+SELECT CURRENT_TIMESTAMP() AS RESULTADO;
+
+SELECT CONCAT("La fecha y la hora de hoy son: ", CURRENT_TIMESTAMP()) AS RESULTADO;
+
+SELECT CONCAT("La fecha y el horario son: ", DATE_FORMAT(CURRENT_TIMESTAMP(), "%W, %d/%m/%Y a las %T")) AS RESULTADO;
+
+SELECT CONVERT(23.45, CHAR) AS RESULTADO;
+
+SELECT SUBSTRING(CONVERT(23.45, CHAR), 3, 1) AS RESULTADO;
+
+# Queremos construir un SQL cuyo resultado sea, para cada cliente:
+# “El cliente Pepito Pérez facturó 120000 en el año 2016”.
+# Solamente para el año 2016.
+
+SELECT CONCAT("El cliente ", C.NOMBRE, " facturó ", CONVERT(ROUND(SUM(I.PRECIO * I.CANTIDAD), 2), CHAR),
+" en el año 2016") AS RESULTADO
+FROM TABLA_DE_CLIENTES C
+INNER JOIN FACTURAS F ON C.DNI = F.DNI
+INNER JOIN ITEMS_FACTURAS I ON I.NUMERO = F.NUMERO
+WHERE YEAR(F.FECHA_VENTA) = 2016
+GROUP BY C.NOMBRE;

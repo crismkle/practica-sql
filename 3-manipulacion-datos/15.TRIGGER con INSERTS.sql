@@ -1,0 +1,139 @@
+CREATE TABLE tb_facturacion(
+FECHA DATE NULL,
+VENTA_TOTAL FLOAT
+);
+
+SELECT * FROM tb_facturacion;
+
+CREATE TABLE `tb_factura1` (
+  `NUMERO` varchar(5) NOT NULL,
+  `FECHA` date DEFAULT NULL,
+  `DNI` varchar(11) NOT NULL,
+  `MATRICULA` varchar(5) NOT NULL,
+  `IMPUESTO` float DEFAULT NULL,
+  PRIMARY KEY (`NUMERO`),
+  KEY `FK_CLIENTE1` (`DNI`),
+  KEY `FK_VENDEDOR1` (`MATRICULA`),
+  CONSTRAINT `FK_CLIENTE1` FOREIGN KEY (`DNI`) REFERENCES `tb_cliente` (`DNI`),
+  CONSTRAINT `FK_VENDEDOR1` FOREIGN KEY (`MATRICULA`) REFERENCES `tb_vendedor` (`MATRICULA`)
+);
+
+CREATE TABLE `tb_items_facturas1` (
+  `NUMERO` varchar(5) NOT NULL,
+  `CODIGO` varchar(10) NOT NULL,
+  `CANTIDAD` int DEFAULT NULL,
+  `PRECIO` float DEFAULT NULL,
+  PRIMARY KEY (`NUMERO`,`CODIGO`),
+  KEY `FK_PRODUCTO_ITEMS1` (`CODIGO`),
+  CONSTRAINT `FK_FACTURA1` FOREIGN KEY (`NUMERO`) REFERENCES `tb_factura1` (`NUMERO`),
+  CONSTRAINT `FK_PRODUCTO1` FOREIGN KEY (`CODIGO`) REFERENCES `tb_producto` (`CODIGO`)
+);
+
+SELECT * FROM tb_items_facturas1;
+SELECT * FROM tb_factura1;
+INSERT INTO tb_factura
+VALUES('0100', '2021-01-01', '1471156710', '235', 0.1);
+SELECT * FROM tb_cliente;
+SELECT * FROM tb_vendedor;
+SELECT * FROM tb_producto;
+
+
+INSERT INTO tb_factura1
+VALUES('0100', '2021-01-01', '1471156710', '235', 0.10);
+
+INSERT INTO tb_items_facturas1
+VALUES('0100', '1002767', 100, 25),
+('0100', '1004327', 200, 25),
+('0100', '1013793', 200, 25);
+
+SELECT A.FECHA, SUM(B.CANTIDAD * B.PRECIO) AS VENTA_TOTAL
+FROM tb_factura1 A
+INNER JOIN
+tb_items_facturas1 B
+ON A.NUMERO = B.NUMERO
+GROUP BY A.FECHA;
+
+INSERT INTO tb_factura1
+VALUES('0101', '2021-01-01', '1471156710', '235', 0.10);
+
+INSERT INTO tb_items_facturas1
+VALUES('0101', '1002767', 100, 25),
+('0101', '1004327', 200, 25),
+('0101', '1013793', 200, 25);
+
+INSERT INTO tb_factura1
+VALUES('0102', '2021-01-01', '1471156710', '235', 0.10);
+
+INSERT INTO tb_items_facturas1
+VALUES('0102', '1002767', 200, 25),
+('0102', '1004327', 300, 25),
+('0102', '1013793', 400, 25);
+
+
+/* CREAMOS EL TRIGGER DE FACTURACIÓN PARA CADA INSERT */
+/* DELIMITA DÓNDE TERMINA EL TRIGGER */
+DELIMITER //
+
+CREATE TRIGGER TG_FACTURACION_INSERT
+AFTER INSERT ON tb_items_facturas1
+FOR EACH ROW BEGIN
+	DELETE FROM tb_facturacion;
+	INSERT INTO tb_facturacion
+	SELECT A.FECHA, SUM(B.CANTIDAD * B.PRECIO) AS VENTA_TOTAL
+	FROM tb_factura1 A
+	INNER JOIN
+	tb_items_facturas1 B
+	ON A.NUMERO = B.NUMERO
+	GROUP BY A.FECHA;    
+END //
+
+INSERT INTO tb_factura1
+VALUES('0103', '2021-01-01', '1471156710', '235', 0.10);
+
+INSERT INTO tb_items_facturas1
+VALUES('0103', '1002767', 200, 25),
+('0103', '1004327', 300, 25),
+('0103', '1013793', 400, 25);
+
+SELECT * FROM tb_facturacion;
+SELECT * FROM tb_items_facturas1;
+
+SELECT * FROM tb_factura1;
+INSERT INTO tb_factura1
+VALUES('0104', '2021-01-01', '1471156710', '235', 0.10);
+
+INSERT INTO tb_items_facturas1
+VALUES('0104', '1002767', 200, 25),
+('0104', '1004327', 400, 30),
+('0104', '1013793', 500, 25);
+
+
+/* 
+El siguiente comando SQL calcula la edad actual del cliente:
+
+SELECT DNI, EDAD, FECHA_NACIMIENTO,
+timestampdiff(YEAR, FECHA_NACIMIENTO, NOW()) AS ANOS
+FROM tb_clientes;
+
+Construye un TRIGGER (Lo llamaremos TG_EDAD_CLIENTES_INSERT) que actualiza las edades de los clientes,
+en la tabla de clientes, siempre que la tabla sufra una inclusión.
+
+LA SOLUCIÓN SOLO ACTUALIZA LA EDAD DEL REGISTRO QUE SE INSERTA
+ */
+ 
+SELECT * FROM tb_cliente;
+UPDATE tb_cliente SET EDAD = timestampdiff(YEAR, FECHA_NACIMIENTO, NOW());
+
+DELIMITER //
+CREATE TRIGGER TG_EDAD_CLIENTES_INSERT
+BEFORE INSERT ON tb_cliente
+FOR EACH ROW BEGIN
+    SET NEW.EDAD = timestampdiff(YEAR, NEW.FECHA_NACIMIENTO, NOW());
+END //
+
+
+DROP TRIGGER TG_EDAD_CLIENTES_INSERT;
+
+INSERT INTO tb_cliente VALUES(
+'1471156744', 'Trea Vajo', 'Marconi 1253', 'Budge2', 'La Plata', 'BA',
+'80012213', '1989-03-07', 21, 'F', 250001, 32001, 1);

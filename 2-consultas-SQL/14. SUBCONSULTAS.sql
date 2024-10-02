@@ -1,0 +1,29 @@
+SELECT DISTINCT BARRIO FROM tabla_de_vendedores;
+
+SELECT * FROM tabla_de_clientes
+WHERE BARRIO IN ('Condesa','Del Valle','Contadero','Oblatos');
+
+SELECT * FROM tabla_de_clientes
+WHERE BARRIO IN (SELECT DISTINCT BARRIO FROM tabla_de_vendedores);
+
+SELECT ENVASE, MAX(PRECIO_DE_LISTA)
+AS PRECIO_MAXIMO FROM tabla_de_productos
+GROUP BY ENVASE;
+
+SELECT X.ENVASE, X.PRECIO_MAXIMO FROM
+(SELECT ENVASE, MAX(PRECIO_DE_LISTA)
+AS PRECIO_MAXIMO FROM tabla_de_productos
+GROUP BY ENVASE) X
+WHERE X.PRECIO_MAXIMO >= 10;
+
+# ¿Cuál sería la consulta utilizando la subconsulta que sería equivalente a?:
+# SELECT DNI, COUNT(*) FROM facturas
+# WHERE YEAR(FECHA_VENTA) = 2016
+# GROUP BY DNI
+# HAVING COUNT(*) > 2000;
+
+SELECT F.DNI, F.CANTIDAD
+FROM (SELECT DNI, COUNT(*) AS CANTIDAD FROM facturas
+WHERE YEAR(fecha_venta) = 2016
+GROUP BY DNI) F
+WHERE F.CANTIDAD > 2000;
